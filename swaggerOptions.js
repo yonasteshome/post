@@ -6,7 +6,7 @@ const options = {
       version: '1.0.0',
     },
     servers: [
-      { url: 'https://your-deployed-backend.com' } // ✅ Change from localhost
+      { url: 'https://post-xw77.onrender.com' } 
     ],
   },
   apis: ['./routes/*.js'],
