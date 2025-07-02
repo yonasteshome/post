@@ -1,17 +1,13 @@
-// backend/swaggerOptions.js
-export default {
+const options = {
   definition: {
-    openapi: "3.0.0",
+    openapi: '3.0.0',
     info: {
-      title: "Social Media API",
-      version: "1.0.0",
-      description: "API docs for your social app",
+      title: 'Your API',
+      version: '1.0.0',
     },
     servers: [
-      {
-        url: "http://localhost:5000",
-      },
+      { url: 'https://your-deployed-backend.com' } // ✅ Change from localhost
     ],
   },
-  apis: ["./routes/*.js"], // Swagger will scan all route files
+  apis: ['./routes/*.js'],
 };
