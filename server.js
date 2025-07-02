@@ -21,6 +21,8 @@ import swaggerJSDoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
 import swaggerOptions from "./swaggerOptions.js";
 
+
+
 // App configuration
 dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
@@ -31,6 +33,7 @@ const port = process.env.PORT || 5000;
 const MONGO_URL = process.env.MONGO_URL;
 
 // Middlewares
+
 app.use(express.json());
 app.use(helmet());
 app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
@@ -53,6 +56,10 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
+// Swagger setup
+const swaggerSpec = swaggerJSDoc(swaggerOptions);
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
 // Routes
 app.use("/auth", authRoutes);
 app.use("/user", userRoutes);
@@ -61,9 +68,7 @@ app.use("/posts", postRoutes);
 // Register route with image upload
 app.post("/auth/register", upload.single("picture"), register);
 
-// Swagger setup
-const swaggerSpec = swaggerJSDoc(swaggerOptions);
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
 
 // Connect to MongoDB and start server
 mongoose
