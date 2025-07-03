@@ -1,19 +1,19 @@
 import express from "express";
 import multer from "multer";
 import { register, login } from "../controllers/auth.js";
-
-const router = express.Router();
 import path from "path";
 import { fileURLToPath } from "url";
+
+const router = express.Router();
 
 // Required to resolve __dirname in ES module scope
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Set up multer storage
+// Multer storage configuration
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, path.join(__dirname, "../public/assets")); 
+    cb(null, path.join(__dirname, "../public/assets"));
   },
   filename: function (req, file, cb) {
     cb(null, Date.now() + "-" + file.originalname);
@@ -45,24 +45,35 @@ const upload = multer({ storage });
  *             type: object
  *             required:
  *               - picture
- *               - name
+ *               - firstName
+ *               - lastName
  *               - email
  *               - password
+ *               - location
+ *               - occupation
  *             properties:
  *               picture:
  *                 type: string
  *                 format: binary
- *               name:
+ *               firstName:
+ *                 type: string
+ *               lastName:
  *                 type: string
  *               email:
  *                 type: string
  *               password:
+ *                 type: string
+ *               location:
+ *                 type: string
+ *               occupation:
  *                 type: string
  *     responses:
  *       201:
  *         description: User created successfully
  *       400:
  *         description: Bad request (e.g., missing fields)
+ *       500:
+ *         description: Internal server error
  */
 router.post("/register", upload.single("picture"), register);
 
@@ -89,8 +100,10 @@ router.post("/register", upload.single("picture"), register);
  *     responses:
  *       200:
  *         description: Login successful
- *       401:
- *         description: Invalid credentials
+ *       400:
+ *         description: User does not exist or invalid credentials
+ *       500:
+ *         description: Internal server error
  */
 router.post("/login", login);
 
