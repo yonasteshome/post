@@ -6,8 +6,10 @@ const options = {
       version: '1.0.0',
     },
     servers: [
-      { url: 'https://post-xw77.onrender.com' } 
+      { url: 'https://your-deployed-backend.com' } // ✅ Update this to your actual deployed URL
     ],
   },
   apis: ['./routes/*.js'],
 };
+
+export default options; // ✅ THIS LINE FIXES YOUR ISSUE
