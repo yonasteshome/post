@@ -1,26 +1,34 @@
 import express from "express";
 import multer from "multer";
-import { register, login } from "../controllers/auth.js";
 import path from "path";
 import { fileURLToPath } from "url";
+import {
+  register,
+  login,
+  forgotPassword,
+  resetPassword,
+} from "../controllers/auth.js";
 
 const router = express.Router();
 
-// Required to resolve __dirname in ES module scope
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Multer storage configuration
-const storage = multer.memoryStorage(); // ✅ store image in memory
-
-
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, path.join(__dirname, "../public/assets"));
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + "-" + file.originalname);
+  },
+});
 const upload = multer({ storage });
 
 /**
  * @swagger
  * tags:
  *   name: Auth
- *   description: Authentication routes
+ *   description: Authentication and user management
  */
 
 /**
@@ -37,45 +45,41 @@ const upload = multer({ storage });
  *         multipart/form-data:
  *           schema:
  *             type: object
- *             required:
- *               - picture
- *               - firstName
- *               - lastName
- *               - email
- *               - password
- *               - location
- *               - occupation
  *             properties:
- *               picture:
- *                 type: string
- *                 format: binary
  *               firstName:
  *                 type: string
  *               lastName:
  *                 type: string
  *               email:
  *                 type: string
+ *                 format: email
  *               password:
  *                 type: string
+ *                 format: password
  *               location:
  *                 type: string
  *               occupation:
  *                 type: string
+ *               picture:
+ *                 type: string
+ *                 format: binary
+ *             required:
+ *               - firstName
+ *               - lastName
+ *               - email
+ *               - password
  *     responses:
  *       201:
  *         description: User created successfully
  *       400:
- *         description: Bad request (e.g., missing fields)
- *       500:
- *         description: Internal server error
+ *         description: Bad request (e.g. missing fields or email exists)
  */
-router.post("/register", upload.single("picture"), register);
 
 /**
  * @swagger
  * /auth/login:
  *   post:
- *     summary: Log in a user
+ *     summary: Login a user
  *     tags: [Auth]
  *     requestBody:
  *       required: true
@@ -83,22 +87,90 @@ router.post("/register", upload.single("picture"), register);
  *         application/json:
  *           schema:
  *             type: object
- *             required:
- *               - email
- *               - password
  *             properties:
  *               email:
  *                 type: string
+ *                 format: email
  *               password:
  *                 type: string
+ *                 format: password
+ *             required:
+ *               - email
+ *               - password
  *     responses:
  *       200:
- *         description: Login successful
+ *         description: Successful login
  *       400:
- *         description: User does not exist or invalid credentials
- *       500:
- *         description: Internal server error
+ *         description: Invalid credentials or user does not exist
  */
+
+/**
+ * @swagger
+ * /auth/forgot-password:
+ *   post:
+ *     summary: Request a password reset link
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               redirectUrl:
+ *                 type: string
+ *             required:
+ *               - email
+ *               - redirectUrl
+ *     responses:
+ *       200:
+ *         description: Reset link sent successfully
+ *       400:
+ *         description: Missing redirect URL or bad request
+ *       404:
+ *         description: User not found
+ */
+
+/**
+ * @swagger
+ * /auth/reset-password/{token}:
+ *   post:
+ *     summary: Reset password with token
+ *     tags: [Auth]
+ *     parameters:
+ *       - in: path
+ *         name: token
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Password reset token
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               newPassword:
+ *                 type: string
+ *                 format: password
+ *             required:
+ *               - newPassword
+ *     responses:
+ *       200:
+ *         description: Password updated successfully
+ *       400:
+ *         description: Invalid or expired token
+ *       404:
+ *         description: User not found
+ */
+
+router.post("/register", upload.single("picture"), register);
 router.post("/login", login);
+router.post("/forgot-password", forgotPassword);
+router.post("/reset-password/:token", resetPassword);
 
 export default router;
